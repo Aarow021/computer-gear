@@ -29,14 +29,14 @@ function getAbsoluteOffset(element) {
 
 function calculateAngle() {
     const rect = gearWrapper.getBoundingClientRect();
-    const offset  = getAbsoluteOffset(gearWrapper);
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const x = mouseX - offset.left;
-    const y = mouseY - offset.top;
-    const deltaX = x - centerX;
-    const deltaY = y - centerY;
+    const centerX = rect.left + rect.width / 2; // Center X relative to the page
+    const centerY = rect.top + rect.height / 2; // Center Y relative to the page
+    const deltaX = mouseX - centerX;
+    const deltaY = mouseY - centerY;
     let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+    if (angle < 0) {
+        angle += 360; // Convert negative angles to positive (0-360)
+    }
     return angle;
 }
 
