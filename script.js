@@ -5,7 +5,9 @@ let textWrapper;
 let isGearHeld = false;
 let progress = 0;
 let lastAngle = 0;
-let textHistory = [];
+let textPointer;
+let wordPool = ['Fun', 'Optimistic', 'Persistant', '😄', 'Curious', 'Dedicated', 'Happy', 'thinking', '( ˶ˆᗜˆ˵ )']
+let wordCount = 0;
 let mouseX = 0;
 let mouseY = 0;
 
@@ -15,16 +17,21 @@ function clamp(num, min, max) {
     return Math.max(Math.min(num, max), min)
 }
 
-// gets offset relative to the page, not the parent
-function getAbsoluteOffset(element) {
-  let top = 0;
-  let left = 0;
-  while (element) {
-    top += element.offsetTop;
-    left += element.offsetLeft;
-    element = element.offsetParent;
-  }
-  return { top, left };
+// returns count vw
+function vw(count=1) {
+  const viewportWidth = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+  return (viewportWidth / 100) * count;
+}
+
+// returns count vh
+function vh(count=1) {
+  const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+  return (viewportHeight / 100) * count;
+}
+
+// returns count vmin
+function vmin(count=1) {
+  return Math.min(vw(count), vh(count));
 }
 
 function calculateAngle() {
@@ -40,10 +47,32 @@ function calculateAngle() {
     return angle;
 }
 
+// generates the next word
+function generateWord() {
+    let text = wordPool[wordCount % wordPool.length];
+    const wordElement = document.createElement('span');
+    wordElement.textContent = text;
+    textWrapper.prepend(wordElement);
+    wordCount++;
+    return wordElement;
+}
+
+// checks if the text pointer has passed the boundry;
+function checkPointer() {
+    let pointerLeft = textPointer.offsetLeft;
+    if (pointerLeft >= vmin(10)) {
+        generateWord();
+        let words = textWrapper.children;
+        textPointer = words[0];
+    }
+}
+
+// updates the text when the gear moves
 function updateText() {
     let scale = parseFloat(getComputedStyle(textWrapper).fontSize) / 20;
     textWrapper.style.maxWidth = progress * scale;
     textWrapper.style.width = progress * scale;
+    checkPointer();
 }
 
 // handles gear rotation
@@ -58,7 +87,7 @@ function gearHandler() {
         angleDiff += 360;
     }
     progress += angleDiff;
-    progress = clamp(progress, 0, 520);
+    progress = clamp(progress, 0, Infinity);
     document.getElementById('progress').innerText = `${Math.round(progress)}`;
     lastAngle = angle;
     gear.style.transform = `rotate(${progress % 360 - 180}deg)`;
@@ -69,19 +98,44 @@ function init() {
     gear = document.querySelector('.gear');
     gearWrapper = document.querySelector('.gear-wrapper');
     textWrapper = document.querySelector('.text-wrapper');
-    window.addEventListener('mousemove', (e)=> {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        gearHandler();
-    });
-    gearWrapper.addEventListener('mousedown', (e) => {
-        lastAngle = calculateAngle(e);
-        isGearHeld = true;
-    });
+    generateWord();
+    generateWord();
+    textPointer = generateWord();
 
-    window.addEventListener('mouseup', () => {
-        isGearHeld = false;
-    });
+    // handles touch/clicks
+    let pointerTypes = {
+        mouse: {move: 'mousemove', down: 'mousedown', up: 'mouseup'}, 
+        touch: {move: 'touchmove', down: 'touchstart', up: 'touchend'}
+    };
+    
+    for (const pointer of Object.values(pointerTypes)) {
+        window.addEventListener(pointer.move, (e) => {
+            if (e.type === 'mousemove') {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            } else if (e.type === 'touchmove' && e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }
+            gearHandler();
+        });
+
+        gearWrapper.addEventListener(pointer.down, (e) => {
+            if (e.type === 'mousedown') {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            } else if (e.type === 'touchstart' && e.touches.length > 0) {
+                mouseX = e.touches[0].clientX;
+                mouseY = e.touches[0].clientY;
+            }
+            lastAngle = calculateAngle();
+            isGearHeld = true;
+        });
+    
+        window.addEventListener(pointer.up, () => {
+            isGearHeld = false;
+        });
+    }
 
     window.addEventListener('resize', updateText)
 }

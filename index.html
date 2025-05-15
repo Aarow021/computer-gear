@@ -4,20 +4,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+
 </head>
 <body>
-    <p style="display: none">Progress: <output id="progress">0</output></p>
-    <p style="display: none">MouseX: <output id="mouseX">0</output></p>
-    <p style="display: none">MouseY: <output id="mouseY">0</output></p>
-    <main>
-        <div class="computer-wrapper no-drag">
-            <img src="imgs/computer.png" alt="computer" class="computer no-drag">
-            <div class="gear-wrapper no-drag" draggable="false">
-                <img src="imgs/gear.svg" alt="gear" class="gear no-drag" draggable="false">
+    <div class="page-wrapper">
+        <p style="display: none">Progress: <output id="progress">0</output></p>
+        <p style="display: none">MouseX: <output id="mouseX">0</output></p>
+        <p style="display: none">MouseY: <output id="mouseY">0</output></p>
+        <main>
+            <div class="computer-wrapper no-drag">
+                <img src="imgs/computer.png" alt="computer" class="computer no-drag">
+                <div class="gear-wrapper no-drag" draggable="false">
+                    <img src="imgs/gear.svg" alt="gear" class="gear no-drag" draggable="false">
+                </div>
+                <div class="text-wrapper"></div>
             </div>
-            <div class="text-wrapper">Fun Optimistic Persistant Curious Dedicated Happy</div>
-        </div>
-    </main>
+        </main>
+        <div class="edge"></div>
+    </div>
     <script src="script.js"></script>
 </body>
 </html>
